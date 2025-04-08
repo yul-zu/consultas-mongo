@@ -1,34 +1,68 @@
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 using MongoDB.Driver;
- [ApiController]
-[Route("api/eq")]
-public class EqController : Controller
+
+namespace consultas_mongo.Controllers.Api
 {
-    [HttpGet("listar-agencias")]
-    public IActionResult ListarAgencias(string agencia, string? agente)
+    [ApiController]
+    [Route("api/eq")]
+    public class EqController : Controller
     {
-        // Listar todos los registros de la agencia especificada
+        private readonly IMongoCollection<Inmueble> collection;
 
-        MongoClient client = new MongoClient(CadenasConexion.MONGO_DB);
-        var db = client.GetDatabase("Inmuebles");
-        var collection = db.GetCollection<Inmueble>("RentasVentas");
-
-        // Que la agencia sea la especificada
-        var filtroAgencia = Builders<Inmueble>.Filter.Eq(x => x.Agencia, agencia);
-
-        if (!string.IsNullOrWhiteSpace(agente))
+        public EqController()
         {
-            var filtroAgente = Builders<Inmueble>.Filter.Eq(x => x.NombreAgente, agente);
-            var filtroCompuesto = Builders<Inmueble>.Filter.And(filtroAgencia, filtroAgente);
+            var client = new MongoClient(CadenasConexion.MONGO_DB);
+            var db = client.GetDatabase("Inmuebles");
+            collection = db.GetCollection<Inmueble>("RentasVentas");
+        }
 
-            var lista = collection.Find(filtroCompuesto).ToList();
+        // a) Mostrar registros con operación "Renta"
+        [HttpGet("operacion-renta")]
+        public IActionResult ObtenerPorOperacion()
+        {
+            var filtro = Builders<Inmueble>.Filter.Eq(x => x.Operacion, "Renta");
+            var lista = collection.Find(filtro).ToList();
             return Ok(lista);
         }
-        else{
-            var lista = collection.Find(filtroAgencia).ToList();
+
+        // b) Mostrar registros con 3 pisos
+        [HttpGet("pisos-tres")]
+        public IActionResult ObtenerPorPisos()
+        {
+            var filtro = Builders<Inmueble>.Filter.Eq(x => x.Pisos, 3);
+            var lista = collection.Find(filtro).ToList();
+            return Ok(lista);
+        }
+
+        // c) Mostrar registros con nombre_agente "Carlos Garcia"
+        [HttpGet("agente-Carlos-García")]
+        public IActionResult ObtenerPorAgente()
+        {
+            var filtro = Builders<Inmueble>.Filter.Eq(x => x.NombreAgente, "Carlos García");
+            var lista = collection.Find(filtro).ToList();
+            return Ok(lista);
+        }
+
+        // d) Mostrar registros con agencia "Inmobilaria Perez"
+        [HttpGet("Inmobiliaria-Pérez")]
+        public IActionResult ObtenerPorAgencia()
+        {
+            var filtro = Builders<Inmueble>.Filter.Eq(x => x.Agencia, "Inmobiliaria Pérez");
+            var lista = collection.Find(filtro).ToList();
+            return Ok(lista);
+        }
+
+        // e) Mostrar registros que NO tienen baños (null o 0)
+        [HttpGet("sin-baños")]
+        public IActionResult ObtenerSinBanios()
+        {
+            var filtro = Builders<Inmueble>.Filter.Eq(x => x.Banios, 0);
+            var lista = collection.Find(filtro).ToList();
             return Ok(lista);
         }
     }
 }
+
 
 

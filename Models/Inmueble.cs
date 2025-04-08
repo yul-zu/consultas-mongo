@@ -33,7 +33,8 @@ public class Inmueble {
     public string Agencia { get; set; } = string.Empty;
 
     [BsonElement("fecha_publicacion")]
-    public string FechaPublicacion { get; set; } = string.Empty;
+    public string FechaPublicacion { get; set; }
+
 
     [BsonElement("costo")]
     public int Costo { get; set; }
